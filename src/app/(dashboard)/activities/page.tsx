@@ -2999,7 +2999,7 @@ export default function ActivitiesPage() {
           <div className="border-b-2 border-indigo-600 pb-5 mb-6 flex justify-between items-end">
             <div>
               <div className="flex items-center gap-2.5">
-                <img src="/Logo.png" className="w-8 h-8 rounded-xl object-cover shrink-0" alt="Notela Logo" />
+                <img src="/logo.png" className="w-8 h-8 rounded-xl object-cover shrink-0" alt="Notela Logo" />
                 <span className="text-2xl font-black tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                   Notela
                 </span>
