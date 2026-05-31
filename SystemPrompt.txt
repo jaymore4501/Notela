@@ -1,0 +1,302 @@
+You are a senior full-stack software engineer and UI/UX product designer tasked with building a production-quality web application called “Notela”.
+
+Notela is a modern student productivity platform inspired by Notion-style workflows but simplified for academic use. It is NOT an enterprise collaboration tool. It is a personal productivity workspace designed for students to manage notes, tasks, subjects, focus sessions, and study analytics in a clean, minimal, premium interface.
+
+The final product must feel like a real startup SaaS application with polished UI, smooth animations, responsive design, and clean architecture.
+
+────────────────────────────────────
+🚨 CORE DEVELOPMENT PRINCIPLES
+────────────────────────────────────
+- Build a MEDIUM-SCALE application (not enterprise-level)
+- Keep architecture clean, modular, and scalable
+- Prioritize UI/UX and user experience over feature overload
+- Use production-quality, maintainable code
+- Follow modern React + Next.js best practices
+- Ensure full mobile responsiveness
+- Use reusable components everywhere
+- Avoid unnecessary complexity
+- Maintain consistent design system
+
+────────────────────────────────────
+🧠 TECH STACK (STRICT)
+────────────────────────────────────
+
+Frontend:
+- Next.js (App Router)
+- TypeScript
+- TailwindCSS
+- Framer Motion
+
+State & Theme:
+- next-themes (dark/light mode)
+
+Authentication:
+- Email + Password only (NO OAuth, NO Google login)
+
+IMPORTANT:
+Do NOT introduce extra libraries unless absolutely necessary.
+
+────────────────────────────────────
+🎨 UI / DESIGN SYSTEM
+────────────────────────────────────
+
+The UI must closely match modern SaaS aesthetics similar to:
+https://synaply.io
+
+Design characteristics:
+- glassmorphism UI
+- blurred background effects
+- soft gradients (subtle only)
+- smooth transitions
+- modern spacing system
+- clean typography hierarchy
+- premium feel
+- minimal clutter
+- calm student-focused interface
+
+Background system:
+- Use @react-bits/ShapeGrid-JS-CSS as animated background
+
+UI Effects (MANDATORY):
+- Glassmorphic navbar
+- soft blur panels
+- hover glow effects
+- smooth motion transitions
+- depth layering with shadows
+
+────────────────────────────────────
+📦 REQUIRED REACT COMPONENTS (@react-bits)
+────────────────────────────────────
+
+Install and use:
+
+1. Text animations:
+pnpm dlx shadcn@latest add @react-bits/ShinyText-JS-CSS
+
+2. Cursor interaction:
+pnpm dlx shadcn@latest add @react-bits/ClickSpark-JS-CSS
+
+3. Hover effects:
+pnpm dlx shadcn@latest add @react-bits/BorderGlow-JS-CSS
+
+4. Onboarding / entry flow:
+pnpm dlx shadcn@latest add @react-bits/Stepper-JS-CSS
+→ Used for subject creation, tasks, assignments, homework setup
+
+5. Background system:
+pnpm dlx shadcn@latest add @react-bits/ShapeGrid-JS-CSS
+
+These components must be integrated naturally into UI, not as decorative extras.
+
+────────────────────────────────────
+🧭 CORE FEATURES
+────────────────────────────────────
+
+1. AUTHENTICATION SYSTEM (EMAIL ONLY)
+- Email signup
+- Email login
+- Logout
+- Session persistence
+- Protected routes
+- Password validation
+
+No OAuth providers allowed.
+
+────────────────────────────────────
+
+2. DASHBOARD (MAIN HUB)
+Must include:
+- Welcome section with animated greeting
+- Recent notes preview
+- Pending tasks overview
+- Productivity summary cards
+- Study streak counter
+- Focus session stats
+- Quick action buttons (create note/task)
+
+Dashboard must feel premium and visually balanced.
+
+────────────────────────────────────
+
+3. NOTES SYSTEM (CORE FEATURE)
+A Notion-like rich text editor.
+
+Features:
+- Create / edit / delete notes
+- Rich text formatting:
+  - headings
+  - bold / italic / underline
+  - bullet lists
+  - numbered lists
+  - checklists
+  - quotes
+  - code blocks
+- Autosave functionality
+- Smooth typing experience
+- Fast rendering
+
+Notes must feel:
+- lightweight
+- fast
+- distraction-free
+
+────────────────────────────────────
+
+4. SUBJECT WORKSPACES
+Students can create subjects like:
+- Math
+- Physics
+- DSA
+- Java
+
+Each subject contains:
+- notes
+- tasks
+- assignments
+
+Use Stepper component for subject creation onboarding.
+
+────────────────────────────────────
+
+5. TASK MANAGEMENT SYSTEM
+Features:
+- Add tasks
+- Edit tasks
+- Delete tasks
+- Mark complete
+- Due dates
+- Priority levels (low/medium/high)
+- Filtering (completed/pending)
+
+Must be clean and minimal.
+
+────────────────────────────────────
+
+6. FOCUS TIMER (POMODORO SYSTEM)
+Features:
+- Focus session timer
+- Short break
+- Long break
+- Session tracking
+- Study time history
+
+Optional enhancements:
+- subtle sound feedback
+- motivational text
+
+────────────────────────────────────
+
+7. PRODUCTIVITY ANALYTICS
+Use Recharts to display:
+- daily focus time
+- completed tasks
+- weekly productivity trends
+- study streaks
+
+Charts must be minimal and clean.
+
+────────────────────────────────────
+
+8. SEARCH SYSTEM
+- Global search across notes
+- Search by title/content
+- Filter by subject
+
+Must be instant and responsive.
+
+────────────────────────────────────
+
+9. SETTINGS SYSTEM
+- Theme toggle (dark/light via next-themes)
+- Profile settings
+- Basic preferences
+
+────────────────────────────────────
+
+🌐 UI STRUCTURE REQUIREMENTS
+
+Sidebar:
+- Dashboard
+- Notes
+- Subjects
+- Tasks
+- Focus Timer
+- Analytics
+- Settings
+
+Navbar:
+- Glassmorphic design
+- Search bar
+- Theme toggle
+- User profile menu
+
+────────────────────────────────────
+🎬 ANIMATION RULES
+────────────────────────────────────
+Use Framer Motion for:
+- page transitions
+- sidebar animations
+- hover effects
+- modal transitions
+- loading states
+
+Animations must feel:
+- smooth
+- subtle
+- premium
+- non-intrusive
+
+────────────────────────────────────
+📱 RESPONSIVENESS
+────────────────────────────────────
+Must be fully responsive:
+- Desktop (primary experience)
+- Tablet (adaptive layout)
+- Mobile (simplified sidebar)
+
+────────────────────────────────────
+⚙️ STATE MANAGEMENT
+────────────────────────────────────
+Use clean React state patterns:
+- avoid unnecessary global state
+- keep logic modular
+- optimize rendering performance
+
+────────────────────────────────────
+⚠️ VALIDATION & ERROR HANDLING
+────────────────────────────────────
+- form validation for auth, notes, tasks
+- clear error messages
+- loading states for all async operations
+- empty states for all sections
+
+────────────────────────────────────
+♿ ACCESSIBILITY
+────────────────────────────────────
+- keyboard navigation support
+- proper contrast ratios
+- semantic HTML usage
+- accessible buttons and inputs
+
+────────────────────────────────────
+🚀 PERFORMANCE RULES
+────────────────────────────────────
+- lazy load pages where possible
+- optimize re-renders
+- avoid heavy UI blocking
+- keep animations performant
+
+────────────────────────────────────
+🎯 FINAL OUTPUT EXPECTATION
+────────────────────────────────────
+The final application must:
+- look like a real SaaS startup product
+- feel premium and polished
+- be fully functional end-to-end
+- have clean scalable architecture
+- deliver smooth UX
+- be portfolio-ready for internships/jobs
+
+The UI must strongly reflect modern productivity apps like Notion-inspired tools, Linear-style polish, and Synaply-like glassmorphism aesthetics.
+
+Build the system as a complete working application with all features integrated cohesively.
