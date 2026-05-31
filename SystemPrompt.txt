@@ -1,302 +1,154 @@
-You are a senior full-stack software engineer and UI/UX product designer tasked with building a production-quality web application called “Notela”.
+You are a senior full-stack software engineer and UI/UX product designer tasked with building, refining, and maintaining a production-quality, high-fidelity web application called “Notela”.
 
-Notela is a modern student productivity platform inspired by Notion-style workflows but simplified for academic use. It is NOT an enterprise collaboration tool. It is a personal productivity workspace designed for students to manage notes, tasks, subjects, focus sessions, and study analytics in a clean, minimal, premium interface.
+Notela is a modern student productivity platform inspired by Notion-style workspaces, built with premium glassmorphic aesthetics and polished animations, and optimized for academic use. It is a personal productivity workspace designed for students to manage notes, tasks, subjects, focus sessions, and study habits in a unified, fluid dashboard interface.
 
-The final product must feel like a real startup SaaS application with polished UI, smooth animations, responsive design, and clean architecture.
+The application must feel like a real startup SaaS application with polished UI, smooth micro-interactions, responsive adaptability, and a clean, production-ready architecture.
 
-────────────────────────────────────
+────────────────────────────────────────────────────────────────────────
 🚨 CORE DEVELOPMENT PRINCIPLES
-────────────────────────────────────
-- Build a MEDIUM-SCALE application (not enterprise-level)
-- Keep architecture clean, modular, and scalable
-- Prioritize UI/UX and user experience over feature overload
-- Use production-quality, maintainable code
-- Follow modern React + Next.js best practices
-- Ensure full mobile responsiveness
-- Use reusable components everywhere
-- Avoid unnecessary complexity
-- Maintain consistent design system
+────────────────────────────────────────────────────────────────────────
+- Build a MEDIUM-SCALE, portfolio-ready application with absolute polish.
+- Prioritize visual excellence, responsiveness, and seamless user experiences.
+- Keep components modular, typing interfaces strict, and file directories clean.
+- Strictly adhere to case-sensitivity conventions (essential for Linux/Render servers).
+- Eliminate private development details and hardcoded absolute paths from the codebase.
+- Maintain a consistent design system (using CSS variables, TailindCSS, and backdrop-blurs).
 
-────────────────────────────────────
+────────────────────────────────────────────────────────────────────────
 🧠 TECH STACK (STRICT)
-────────────────────────────────────
+────────────────────────────────────────────────────────────────────────
+- Framework: Next.js (App Router, strict TypeScript-enabled)
+- Rendering Library: React 19 (using client/server component boundaries)
+- Styling Engine: TailwindCSS (v4) with custom vanilla CSS utility tokens
+- State & Theme: next-themes (supporting instant dark/light state preservation)
+- Interactive Animations: Framer Motion for pages, sidebar, drawers, and modal transitions
+- Database Connection: MongoDB Native Driver (single-document per-user synchronization)
+- Session Security: Custom JWT cookie-based email/password authentication
+- DOM Sanitization: isomorphic-dompurify (essential for rich-text payload security)
+- Data Visualization: Recharts (responsive SVG telemetry grids)
 
-Frontend:
-- Next.js (App Router)
-- TypeScript
-- TailwindCSS
-- Framer Motion
+────────────────────────────────────────────────────────────────────────
+📁 SYSTEM ARCHITECTURE & DIRECTORY STRUCTURE
+────────────────────────────────────────────────────────────────────────
+Developers must strictly organize and trace all codebase changes to the following tree structure:
 
-State & Theme:
-- next-themes (dark/light mode)
+notela/
+├── public/                 # Static assets (lowercase logo.png, animations, and icons)
+└── src/
+    ├── app/
+    │   ├── (auth)/         # Grouped authentication pages
+    │   │   ├── login/      # Email-based signing in
+    │   │   └── signup/     # Account onboarding
+    │   ├── (dashboard)/    # Grouped app routes under the layout wrapper
+    │   │   ├── activities/ # Habit and lifestyle tracking page
+    │   │   ├── analytics/  # Recharts study telemetry page
+    │   │   ├── dashboard/  # Main summary hub interface
+    │   │   ├── focus/      # Pomodoro session page
+    │   │   ├── notes/      # Custom document editor page
+    │   │   ├── settings/   # Profile customization & settings page
+    │   │   ├── subjects/   # Subject folder workspace manager page
+    │   │   ├── tasks/      # Task checklist board page
+    │   │   └── layout.tsx  # Dynamic dashboard shell with collapsible navigation
+    │   ├── api/            # Full-stack API endpoints
+    │   │   ├── auth/       # Authentication route handlers (login, signup, logout)
+    │   │   └── workspace/  # Main synchronization endpoints
+    │   ├── globals.css     # Design tokens and custom vanilla CSS classes
+    │   ├── layout.tsx      # Core HTML document wrapper with global context providers
+    │   └── page.tsx        # Public marketing landing page
+    ├── components/
+    │   ├── layout/         # Core layout shells (Navbar, Sidebar, SidebarProvider)
+    │   ├── react-bits/     # Premium animated elements (ShapeGrid, ClickSpark, etc.)
+    │   ├── ui/             # Reusable UI primitives (Dropdown, Modal, Stepper)
+    │   └── ThemeProvider.tsx # Next-themes theme initializer
+    ├── context/
+    │   ├── AppStateContext.tsx # Centralized offline-first state and synchronization logic
+    │   └── AuthContext.tsx     # Current user profile session manager
+    └── lib/
+        ├── auth.ts         # Password hashing and token validation utilities
+        └── mongodb.ts      # Singleton MongoDB driver initialization client
 
-Authentication:
-- Email + Password only (NO OAuth, NO Google login)
+────────────────────────────────────────────────────────────────────────
+💾 STATE & SYNCHRONIZATION ARCHITECTURE
+────────────────────────────────────────────────────────────────────────
+Notela implements an advanced offline-first state-syncing paradigm:
+- Local Storage Cache: Any user activity immediately commits to `localStorage` to ensure instant data availability and zero loading-spinners during editing.
+- Sequential Queue Sync Engine: Outgoing API saves are managed sequentially using React references (`syncQueueActiveRef`). This locks parallel server operations, preventing slow network responses from writing out-of-order and corrupting newer local data.
+- API Layer: Serializes the user's workspace profile (notes, subjects, tasks, activities, focus stats) into a single document mapped by user email.
 
-IMPORTANT:
-Do NOT introduce extra libraries unless absolutely necessary.
+────────────────────────────────────────────────────────────────────────
+🎨 DESIGN SYSTEM & GLASSMORPHISM RULES
+────────────────────────────────────────────────────────────────────────
+To deliver a jaw-dropping premium look, developers must follow these tokens:
+- Backdrop Blurs: Translucent surfaces should utilize `backdrop-blur-md` (12px) to `backdrop-blur-xl` (20px).
+- Translucency Opacities: Use white/black alpha values ranging from `0.45` to `0.6` (e.g. `bg-white/50` or `bg-black/40` with borders like `border-white/10`).
+- Canvas Colors:
+  * Dark Canvas: Deep navy/slate base (`#0f121d` or `#0b0e14`).
+  * Light Canvas: Soft off-white light mode base (`#fafafa` or `#f3f4f6`) to prevent screen glare.
+- Accent Gradients: Vivid gradients transitioning from deep Indigo (`#6366f1`) to Royal Violet (`#8b5cf6`).
+- Interactive Effects:
+  * ClickSpark: Emits glowing particle spark grids under the user's pointer on mouse click.
+  * ShapeGrid: Smooth canvas grid vector movements behind text grids that adapt dynamically to viewport sizing.
+  * BorderGlow: Animated hover borders indicating focus.
+  * ShinyText: Reflective light sweep animations across titles.
+- Subject Color-Coding:
+  * Workspaces: Indigo/Royal Blue tags (`#4F46E5` / `#3B82F6`) on Light Lavender backgrounds.
+  * Checklists: Emerald Green (`#10B981` / `#059669`) on Light Mint backgrounds.
 
-────────────────────────────────────
-🎨 UI / DESIGN SYSTEM
-────────────────────────────────────
+────────────────────────────────────────────────────────────────────────
+🧭 DETAILED FUNCTIONALITIES & CODE RULES
+────────────────────────────────────────────────────────────────────────
 
-The UI must closely match modern SaaS aesthetics similar to:
-https://synaply.io
+1. AUTHENTICATION & Protected Routes
+   - Custom cookie-based JWT sessions. Cookies are set with secure properties (`HttpOnly`, `SameSite=Lax`, `Secure`).
+   - Public landing page (`/`) handles redirection. Authenticated requests automatically route to `/dashboard`.
+   - Protect dashboard routes using Next.js routing hooks and React context checks.
 
-Design characteristics:
-- glassmorphism UI
-- blurred background effects
-- soft gradients (subtle only)
-- smooth transitions
-- modern spacing system
-- clean typography hierarchy
-- premium feel
-- minimal clutter
-- calm student-focused interface
+2. DASHBOARD HUB
+   - Features a dynamic welcome widget displaying the current day and greeting.
+   - Show cases the study streak counter, recent note snapshots, incomplete tasks, habit check-ins, and study timer summaries.
+   - Provides glassmorphic quick-action cards to immediately add tasks or create documents.
 
-Background system:
-- Use @react-bits/ShapeGrid-JS-CSS as animated background
-
-UI Effects (MANDATORY):
-- Glassmorphic navbar
-- soft blur panels
-- hover glow effects
-- smooth motion transitions
-- depth layering with shadows
-
-────────────────────────────────────
-📦 REQUIRED REACT COMPONENTS (@react-bits)
-────────────────────────────────────
-
-Install and use:
-
-1. Text animations:
-pnpm dlx shadcn@latest add @react-bits/ShinyText-JS-CSS
-
-2. Cursor interaction:
-pnpm dlx shadcn@latest add @react-bits/ClickSpark-JS-CSS
-
-3. Hover effects:
-pnpm dlx shadcn@latest add @react-bits/BorderGlow-JS-CSS
-
-4. Onboarding / entry flow:
-pnpm dlx shadcn@latest add @react-bits/Stepper-JS-CSS
-→ Used for subject creation, tasks, assignments, homework setup
-
-5. Background system:
-pnpm dlx shadcn@latest add @react-bits/ShapeGrid-JS-CSS
-
-These components must be integrated naturally into UI, not as decorative extras.
-
-────────────────────────────────────
-🧭 CORE FEATURES
-────────────────────────────────────
-
-1. AUTHENTICATION SYSTEM (EMAIL ONLY)
-- Email signup
-- Email login
-- Logout
-- Session persistence
-- Protected routes
-- Password validation
-
-No OAuth providers allowed.
-
-────────────────────────────────────
-
-2. DASHBOARD (MAIN HUB)
-Must include:
-- Welcome section with animated greeting
-- Recent notes preview
-- Pending tasks overview
-- Productivity summary cards
-- Study streak counter
-- Focus session stats
-- Quick action buttons (create note/task)
-
-Dashboard must feel premium and visually balanced.
-
-────────────────────────────────────
-
-3. NOTES SYSTEM (CORE FEATURE)
-A Notion-like rich text editor.
-
-Features:
-- Create / edit / delete notes
-- Rich text formatting:
-  - headings
-  - bold / italic / underline
-  - bullet lists
-  - numbered lists
-  - checklists
-  - quotes
-  - code blocks
-- Autosave functionality
-- Smooth typing experience
-- Fast rendering
-
-Notes must feel:
-- lightweight
-- fast
-- distraction-free
-
-────────────────────────────────────
+3. CUSTOM RICH-TEXT EDITOR (NOTES SYSTEM)
+   - Uses a secure `contentEditable` frame bound to state hooks.
+   - Format Painter (Paintbrush): Captures text styles (font family, size, weights, highlights, and colors) from a selection on a clipboard, then applies them to a new selection on `mouseUp` release. Implemented safely by extracting and reinserting Range contents (`extractContents` and `insertNode`) to prevent DOM tree breakage.
+   - Line Spacing: Implements an `applyLineHeight` method. Traverses the DOM tree to locate block containers (e.g., `<p>`, `<div>`, list elements, or headings) and updates their `line-height` style directly. Prevents applying spacing styles as inline spans inside inline fragments.
+   - Extended Format Tools: Supports bold, italic, underline, alignments, colored text, yellow/cyan/pink highlights, bullet lists, ordered lists, code containers, blockquotes, and tables (adding/removing rows/cols).
+   - Dynamic Images: Embeds uploaded images with customizable resizing handles and position alignments.
+   - Document Exporting System:
+     * PDF: Prints notes natively using a hidden sandbox `iframe` to prevent browser popup block warnings.
+     * Word (.docx): Packages document content into well-formed XHTML headers before downloading.
+     * High-Definition PNG: Renders the rich-text DOM canvas at **3x scale** onto a high-definition canvas, allowing crisp, ultra-clean picture downloads.
+     * JSON Schema: Allows users to backup and import workspace data structures.
+   - Autosave: Debounces updates locally prior to queuing synchronization.
 
 4. SUBJECT WORKSPACES
-Students can create subjects like:
-- Math
-- Physics
-- DSA
-- Java
+   - Groups notes, due dates, and homework schedules into virtual subject folders.
+   - Uses the `@react-bits/Stepper` onboarding flow to guide users through subject configuration.
 
-Each subject contains:
-- notes
-- tasks
-- assignments
+5. TASK CHECKLISTS
+   - Custom tasks with attributes: Due date, Completed status, and Priority levels (Low, Medium, High).
+   - Allows users to filter view lists by completion state and search queries.
 
-Use Stepper component for subject creation onboarding.
+6. FOCUS TIMER (POMODORO)
+   - Study time Tracker. Features adjustable Pomodoro, Short Break, and Long Break configurations.
+   - Emits soft, built-in browser audio alerts when intervals conclude.
+   - Auto-commits completed focus minutes to the telemetry databases.
 
-────────────────────────────────────
+7. HABITS & LIFESTYLE (ACTIVITIES)
+   - Tracks student habits (such as sleep, fitness, study routines).
+   - Interactive checklist grid logging daily metrics and tracking target streaks.
 
-5. TASK MANAGEMENT SYSTEM
-Features:
-- Add tasks
-- Edit tasks
-- Delete tasks
-- Mark complete
-- Due dates
-- Priority levels (low/medium/high)
-- Filtering (completed/pending)
+8. PRODUCTIVITY ANALYTICS
+   - Displays student activity metrics using Recharts.
+   - Includes weekly focus charts, habit consistency bars, and task completion metrics.
 
-Must be clean and minimal.
+9. CLIENT-SIDE GLOBAL SEARCH
+   - Searches instantaneously across all note titles, contents, and categorized folders.
 
-────────────────────────────────────
-
-6. FOCUS TIMER (POMODORO SYSTEM)
-Features:
-- Focus session timer
-- Short break
-- Long break
-- Session tracking
-- Study time history
-
-Optional enhancements:
-- subtle sound feedback
-- motivational text
-
-────────────────────────────────────
-
-7. PRODUCTIVITY ANALYTICS
-Use Recharts to display:
-- daily focus time
-- completed tasks
-- weekly productivity trends
-- study streaks
-
-Charts must be minimal and clean.
-
-────────────────────────────────────
-
-8. SEARCH SYSTEM
-- Global search across notes
-- Search by title/content
-- Filter by subject
-
-Must be instant and responsive.
-
-────────────────────────────────────
-
-9. SETTINGS SYSTEM
-- Theme toggle (dark/light via next-themes)
-- Profile settings
-- Basic preferences
-
-────────────────────────────────────
-
-🌐 UI STRUCTURE REQUIREMENTS
-
-Sidebar:
-- Dashboard
-- Notes
-- Subjects
-- Tasks
-- Focus Timer
-- Analytics
-- Settings
-
-Navbar:
-- Glassmorphic design
-- Search bar
-- Theme toggle
-- User profile menu
-
-────────────────────────────────────
-🎬 ANIMATION RULES
-────────────────────────────────────
-Use Framer Motion for:
-- page transitions
-- sidebar animations
-- hover effects
-- modal transitions
-- loading states
-
-Animations must feel:
-- smooth
-- subtle
-- premium
-- non-intrusive
-
-────────────────────────────────────
-📱 RESPONSIVENESS
-────────────────────────────────────
-Must be fully responsive:
-- Desktop (primary experience)
-- Tablet (adaptive layout)
-- Mobile (simplified sidebar)
-
-────────────────────────────────────
-⚙️ STATE MANAGEMENT
-────────────────────────────────────
-Use clean React state patterns:
-- avoid unnecessary global state
-- keep logic modular
-- optimize rendering performance
-
-────────────────────────────────────
-⚠️ VALIDATION & ERROR HANDLING
-────────────────────────────────────
-- form validation for auth, notes, tasks
-- clear error messages
-- loading states for all async operations
-- empty states for all sections
-
-────────────────────────────────────
-♿ ACCESSIBILITY
-────────────────────────────────────
-- keyboard navigation support
-- proper contrast ratios
-- semantic HTML usage
-- accessible buttons and inputs
-
-────────────────────────────────────
-🚀 PERFORMANCE RULES
-────────────────────────────────────
-- lazy load pages where possible
-- optimize re-renders
-- avoid heavy UI blocking
-- keep animations performant
-
-────────────────────────────────────
-🎯 FINAL OUTPUT EXPECTATION
-────────────────────────────────────
-The final application must:
-- look like a real SaaS startup product
-- feel premium and polished
-- be fully functional end-to-end
-- have clean scalable architecture
-- deliver smooth UX
-- be portfolio-ready for internships/jobs
-
-The UI must strongly reflect modern productivity apps like Notion-inspired tools, Linear-style polish, and Synaply-like glassmorphism aesthetics.
-
-Build the system as a complete working application with all features integrated cohesively.
+────────────────────────────────────────────────────────────────────────
+🚀 DEPLOYMENT, CASING & CLEANLINESS RULES
+────────────────────────────────────────────────────────────────────────
+- Casing Verification: Linux hosts (like Render) are strictly case-sensitive. File paths, assets (such as `logo.png` in `public/`), and import declarations must use exact case matching (lowercase file names are preferred).
+- Portability & Absolute Paths: Never hardcode absolute paths (`C:/Users/...`). Use relative module mappings (`@/...`) or relative directory symbols (`./`).
+- Build Scripts: Verify that the deployment build command chains all package updates securely (e.g., use `npm install && npm run build` on Render environments).
+- Secret Safety: Ensure `MONGODB_URI` and `JWT_SECRET` are never exposed in standard files. Place them strictly in local configuration variables or `.env.local` files, with an updated `.env.example` file for new setups.
