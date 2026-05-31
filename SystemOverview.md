@@ -5,7 +5,7 @@
 **Category**: Personal Academic Workspace / Productivity OS  
 **Access Model**: Single-user, offline-first with secure cloud synchronization  
 
-![Notela System Overview Poster](./Notela%20Introduction%20Poster%20SO2.png)
+![Notela System Overview Poster](./public/Notela%20Introduction%20Poster%20SO2.png)
 
 ---
 

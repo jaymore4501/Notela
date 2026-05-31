@@ -10,7 +10,7 @@
 
 **Notela** is a modern, calm, and intelligent glassmorphic academic operating system designed for students. It centralizes note-taking, task management, subject organization, lifestyle habit tracking, focus sessions, and productivity analytics into a single, distraction-free productivity environment.
 
-![Notela Introduction Poster](./Notela%20Introduction%20Poster%20SO1.png)
+![Notela Introduction Poster](./public/Notela%20Introduction%20Poster%20SO1.png)
 
 ---
 
