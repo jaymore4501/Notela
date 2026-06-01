@@ -20,6 +20,8 @@ import {
   RotateCcw,
   Sparkles,
   Upload,
+  AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import BorderGlow from "@/components/react-bits/BorderGlow";
 
@@ -79,6 +81,13 @@ export default function SettingsPage() {
   // Notifications
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+
+  // Delete account modal states
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [confirmEmail, setConfirmEmail] = useState("");
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   // Synchronize inputs with context on load/change
   useEffect(() => {
@@ -144,6 +153,50 @@ export default function SettingsPage() {
       setConfirmPassword("");
     } catch (err) {
       showNotification("error", "An unexpected connection error occurred.");
+    }
+  };
+
+  const handleDeleteAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setDeleteError("");
+
+    if (confirmEmail.trim().toLowerCase() !== user?.email.toLowerCase()) {
+      setDeleteError("Confirmation email address does not match your account.");
+      return;
+    }
+
+    setDeleteLoading(true);
+
+    try {
+      const res = await fetch("/api/auth/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: confirmEmail.trim().toLowerCase(),
+          password: deletePassword,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setDeleteError(data.error || "Incorrect password. Account deletion failed.");
+        return;
+      }
+
+      // Deletion successful: clean local storage cache keys prefixed with notela_
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith("notela_")) {
+          localStorage.removeItem(key);
+        }
+      });
+
+      setIsDeleteModalOpen(false);
+      window.location.href = "/login?deleted=success";
+    } catch (err) {
+      setDeleteError("An unexpected connection error occurred.");
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -391,6 +444,26 @@ export default function SettingsPage() {
                   </button>
                 </div>
               </div>
+
+              {/* Danger Zone */}
+              <div className="border border-rose-500/20 bg-rose-500/5 dark:bg-rose-950/10 rounded-2xl p-6 mt-6">
+                <h2 className="text-sm font-bold uppercase tracking-wider text-rose-500 flex items-center space-x-2">
+                  <AlertTriangle className="w-4.5 h-4.5" />
+                  <span>Danger Zone (Irreversible)</span>
+                </h2>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2 leading-relaxed">
+                  Permanently delete your Notela account and all associated workspaces, notebooks, checklists, Pomodoro stats, and habits history.
+                </p>
+                <div className="mt-4 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    className="px-4 py-2 text-xs bg-rose-600 hover:bg-rose-500 rounded-xl text-white font-semibold cursor-pointer shadow-md transition-colors"
+                  >
+                    Delete Account Permanently
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
@@ -606,6 +679,89 @@ export default function SettingsPage() {
           )}
         </div>
       </div>
+
+      {/* Delete Account Confirmation Modal Overlay */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
+          <div className="w-full max-w-md glass-panel rounded-2xl border border-rose-500/20 p-6 space-y-6 shadow-2xl animate-scale-up">
+            <div className="flex items-center space-x-3 text-rose-500">
+              <AlertTriangle className="w-6 h-6 shrink-0" />
+              <h3 className="text-lg font-bold">Delete Account Permanently?</h3>
+            </div>
+            
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">
+              This action is <strong className="text-rose-500">irreversible</strong>. All your notes, workspaces, subjects, tasks, and study records will be permanently deleted from our database.
+            </p>
+
+            {deleteError && (
+              <div className="p-3 text-xs text-rose-500 bg-rose-500/10 rounded-xl border border-rose-500/20 font-medium">
+                ⚠️ {deleteError}
+              </div>
+            )}
+
+            <form onSubmit={handleDeleteAccount} className="space-y-4">
+              {/* Email confirmation input */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">
+                  Confirm email (<strong>{user?.email}</strong>)
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="Enter your email"
+                  value={confirmEmail}
+                  onChange={(e) => setConfirmEmail(e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-sm rounded-xl glass-input text-neutral-800 dark:text-neutral-200 border border-white/10"
+                />
+              </div>
+
+              {/* Password confirmation input */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">
+                  Enter Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  placeholder="Enter your password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-sm rounded-xl glass-input text-neutral-800 dark:text-neutral-200 border border-white/10"
+                />
+              </div>
+
+              <div className="flex space-x-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsDeleteModalOpen(false);
+                    setConfirmEmail("");
+                    setDeletePassword("");
+                    setDeleteError("");
+                  }}
+                  className="flex-1 py-2.5 text-xs font-semibold rounded-xl bg-neutral-200 dark:bg-white/10 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-300 dark:hover:bg-white/20 transition-all cursor-pointer text-center"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={deleteLoading || confirmEmail.trim().toLowerCase() !== user?.email.toLowerCase() || !deletePassword}
+                  className="flex-1 py-2.5 text-xs font-semibold rounded-xl bg-rose-600 hover:bg-rose-500 disabled:bg-rose-600/40 text-white cursor-pointer transition-all shadow-lg hover:shadow-rose-500/20 flex items-center justify-center space-x-2"
+                >
+                  {deleteLoading ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Deleting...</span>
+                    </>
+                  ) : (
+                    <span>Confirm Delete</span>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

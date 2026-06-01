@@ -11,6 +11,7 @@ function LoginForm() {
   const { login } = useAuth();
   const searchParams = useSearchParams();
   const resetSuccess = searchParams?.get("reset") === "success";
+  const deleteSuccess = searchParams?.get("deleted") === "success";
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -56,6 +57,12 @@ function LoginForm() {
                 Sign in to access your academic dashboard.
               </p>
             </div>
+
+            {deleteSuccess && (
+              <div className="p-3 text-xs text-rose-500 bg-rose-500/10 rounded-xl border border-rose-500/20 text-center font-medium animate-pulse">
+                Your account and data have been permanently deleted.
+              </div>
+            )}
 
             {resetSuccess && (
               <div className="p-3 text-xs text-emerald-500 bg-emerald-500/10 rounded-xl border border-emerald-500/20 text-center font-medium">
