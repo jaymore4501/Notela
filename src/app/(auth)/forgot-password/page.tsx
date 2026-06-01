@@ -108,7 +108,7 @@ export default function ForgotPasswordPage() {
               <p className="mt-1.5 text-sm text-neutral-400">
                 {step === 1
                   ? "Enter your registered email to request a reset code."
-                  : "Type the verification code and set your new password."}
+                  : "We sent a 6-digit OTP to your email. Check your inbox and enter it below."}
               </p>
             </div>
 
