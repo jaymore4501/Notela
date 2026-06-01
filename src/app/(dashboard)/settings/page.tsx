@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useAppState } from "@/context/AppStateContext";
 import { useTheme } from "next-themes";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Settings,
   User,
@@ -20,26 +21,34 @@ import {
   RotateCcw,
   Sparkles,
   Upload,
-  AlertTriangle,
-  Loader2,
 } from "lucide-react";
 import BorderGlow from "@/components/react-bits/BorderGlow";
 
 const COLOR_OPTIONS = [
   "#ef4444", // Red
-  "#f97316", // Orange
-  "#eab308", // Yellow
-  "#10b981", // Green
+  "#22c55e", // Green
   "#3b82f6", // Blue
-  "#6366f1", // Indigo
-  "#8b5cf6", // Purple
-  "#ec4899", // Pink
+  "#f59e0b", // Amber
+  "#a855f7", // Purple
   "#06b6d4", // Cyan
+  "#ec4899", // Pink
+  "#84cc16", // Lime
+  "#f97316", // Orange
+  "#6366f1", // Indigo
   "#14b8a6", // Teal
+  "#eab308", // Yellow
+  "#dc2626", // Crimson
+  "#0ea5e9", // Sky Blue
+  "#d946ef", // Fuchsia
+  "#65a30d", // Olive
+  "#7c3aed", // Violet
+  "#0891b2", // Dark Cyan
+  "#ea580c", // Dark Orange
+  "#16a34a", // Forest Green
 ];
 
 export default function SettingsPage() {
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, deleteAccount } = useAuth();
   const { theme, setTheme } = useTheme();
   const {
     subjects,
@@ -78,16 +87,14 @@ export default function SettingsPage() {
   const [newSubDesc, setNewSubDesc] = useState("");
   const [newSubColor, setNewSubColor] = useState(COLOR_OPTIONS[0]);
 
+  // Delete account confirmation states
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [confirmEmailInput, setConfirmEmailInput] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // Notifications
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
-
-  // Delete account modal states
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [confirmEmail, setConfirmEmail] = useState("");
-  const [deletePassword, setDeletePassword] = useState("");
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [deleteError, setDeleteError] = useState("");
 
   // Synchronize inputs with context on load/change
   useEffect(() => {
@@ -158,45 +165,39 @@ export default function SettingsPage() {
 
   const handleDeleteAccount = async (e: React.FormEvent) => {
     e.preventDefault();
-    setDeleteError("");
-
-    if (confirmEmail.trim().toLowerCase() !== user?.email.toLowerCase()) {
-      setDeleteError("Confirmation email address does not match your account.");
+    if (confirmEmailInput !== user?.email) {
+      showNotification("error", "Email verification does not match.");
       return;
     }
 
-    setDeleteLoading(true);
-
+    setIsDeleting(true);
     try {
-      const res = await fetch("/api/auth/delete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: confirmEmail.trim().toLowerCase(),
-          password: deletePassword,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        setDeleteError(data.error || "Incorrect password. Account deletion failed.");
-        return;
+      // 1. Clear all user local storage items
+      if (user) {
+        const userPrefix = `notela_${user.email.replace(/[@.]/g, "_")}_`;
+        const keysToRemove = [
+          `${userPrefix}subjects`,
+          `${userPrefix}notes`,
+          `${userPrefix}tasks`,
+          `${userPrefix}sessions`,
+          `${userPrefix}pomodoro_config`,
+          `${userPrefix}activities`,
+          `${userPrefix}activity_log`
+        ];
+        keysToRemove.forEach((key) => localStorage.removeItem(key));
       }
 
-      // Deletion successful: clean local storage cache keys prefixed with notela_
-      Object.keys(localStorage).forEach((key) => {
-        if (key.startsWith("notela_")) {
-          localStorage.removeItem(key);
-        }
-      });
-
-      setIsDeleteModalOpen(false);
-      window.location.href = "/login?deleted=success";
+      // 2. Call AuthContext delete account
+      const result = await deleteAccount();
+      if (!result.success) {
+        showNotification("error", result.error || "Failed to delete account.");
+        setIsDeleting(false);
+      } else {
+        setIsDeleteModalOpen(false);
+      }
     } catch (err) {
-      setDeleteError("An unexpected connection error occurred.");
-    } finally {
-      setDeleteLoading(false);
+      showNotification("error", "An unexpected error occurred during deletion.");
+      setIsDeleting(false);
     }
   };
 
@@ -288,7 +289,7 @@ export default function SettingsPage() {
 
       {/* Settings layout grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        
+
         {/* Navigation Tabs on Left */}
         <div className="md:col-span-1 space-y-1">
           {[
@@ -304,11 +305,10 @@ export default function SettingsPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left text-xs font-semibold cursor-pointer transition-all ${
-                  isActive
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left text-xs font-semibold cursor-pointer transition-all ${isActive
                     ? "bg-indigo-600/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400"
                     : "text-neutral-500 hover:bg-black/5 dark:text-neutral-400 dark:hover:bg-white/5"
-                }`}
+                  }`}
               >
                 <Icon className="w-4.5 h-4.5 shrink-0" />
                 <span>{tab.label}</span>
@@ -319,7 +319,7 @@ export default function SettingsPage() {
 
         {/* Configurations Forms on Right */}
         <div className="md:col-span-3 space-y-6">
-          
+
           {/* 1. Profile settings */}
           {activeTab === "profile" && (
             <div className="space-y-6">
@@ -422,22 +422,20 @@ export default function SettingsPage() {
                 <div className="flex gap-4">
                   <button
                     onClick={() => setTheme("light")}
-                    className={`flex-1 p-4 rounded-xl border flex flex-col items-center justify-center space-y-2 cursor-pointer transition-all ${
-                      theme === "light"
+                    className={`flex-1 p-4 rounded-xl border flex flex-col items-center justify-center space-y-2 cursor-pointer transition-all ${theme === "light"
                         ? "border-indigo-600 bg-indigo-600/10 text-indigo-500 font-semibold"
                         : "border-neutral-200 dark:border-neutral-800 text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
-                    }`}
+                      }`}
                   >
                     <Monitor className="w-5 h-5" />
                     <span className="text-xs">Light Theme Mode</span>
                   </button>
                   <button
                     onClick={() => setTheme("dark")}
-                    className={`flex-1 p-4 rounded-xl border flex flex-col items-center justify-center space-y-2 cursor-pointer transition-all ${
-                      theme === "dark"
+                    className={`flex-1 p-4 rounded-xl border flex flex-col items-center justify-center space-y-2 cursor-pointer transition-all ${theme === "dark"
                         ? "border-indigo-600 bg-indigo-600/10 text-indigo-500 font-semibold"
                         : "border-neutral-200 dark:border-neutral-800 text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
-                    }`}
+                      }`}
                   >
                     <Eye className="w-5 h-5" />
                     <span className="text-xs">Dark theme (Slate Navy)</span>
@@ -445,22 +443,32 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* Danger Zone */}
-              <div className="border border-rose-500/20 bg-rose-500/5 dark:bg-rose-950/10 rounded-2xl p-6 mt-6">
-                <h2 className="text-sm font-bold uppercase tracking-wider text-rose-500 flex items-center space-x-2">
-                  <AlertTriangle className="w-4.5 h-4.5" />
-                  <span>Danger Zone (Irreversible)</span>
-                </h2>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2 leading-relaxed">
-                  Permanently delete your Notela account and all associated workspaces, notebooks, checklists, Pomodoro stats, and habits history.
-                </p>
-                <div className="mt-4 flex justify-end">
+              {/* Danger Zone Panel */}
+              <div className="rounded-2xl p-6 border border-rose-500/20 bg-rose-500/5 dark:bg-rose-950/10 space-y-4">
+                <div className="flex items-start space-x-3">
+                  <div className="p-2 rounded-xl bg-rose-500/10 text-rose-500 shrink-0">
+                    <Trash2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold tracking-tight text-neutral-800 dark:text-neutral-200">
+                      Danger Zone: Delete Account Permanently
+                    </h2>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 leading-relaxed">
+                      Once you delete your account, there is no going back. This will immediately erase your profile, all subjects, notes, checklists, habits, and study analytics.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-3 border-t border-rose-500/10 dark:border-rose-950/30">
                   <button
                     type="button"
-                    onClick={() => setIsDeleteModalOpen(true)}
-                    className="px-4 py-2 text-xs bg-rose-600 hover:bg-rose-500 rounded-xl text-white font-semibold cursor-pointer shadow-md transition-colors"
+                    onClick={() => {
+                      setConfirmEmailInput("");
+                      setIsDeleteModalOpen(true);
+                    }}
+                    className="px-4 py-2.5 text-xs bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl cursor-pointer shadow-lg shadow-rose-600/10 transition-colors"
                   >
-                    Delete Account Permanently
+                    Delete My Account...
                   </button>
                 </div>
               </div>
@@ -530,7 +538,7 @@ export default function SettingsPage() {
           {/* 3. Subjects list and creation */}
           {activeTab === "subjects" && (
             <div className="space-y-6 animate-in fade-in duration-200">
-              
+
               {/* Subject creator */}
               <div className="glass-panel rounded-2xl p-6">
                 <form onSubmit={handleAddSubject} className="space-y-4">
@@ -572,9 +580,8 @@ export default function SettingsPage() {
                           key={color}
                           type="button"
                           onClick={() => setNewSubColor(color)}
-                          className={`w-8 h-8 rounded-lg cursor-pointer border-2 transition-all ${
-                            newSubColor === color ? "border-neutral-800 dark:border-white scale-110 shadow-lg" : "border-transparent"
-                          }`}
+                          className={`w-8 h-8 rounded-lg cursor-pointer border-2 transition-all ${newSubColor === color ? "border-neutral-800 dark:border-white scale-110 shadow-lg" : "border-transparent"
+                            }`}
                           style={{ backgroundColor: color }}
                         />
                       ))}
@@ -680,88 +687,84 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Delete Account Confirmation Modal Overlay */}
-      {isDeleteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
-          <div className="w-full max-w-md glass-panel rounded-2xl border border-rose-500/20 p-6 space-y-6 shadow-2xl animate-scale-up">
-            <div className="flex items-center space-x-3 text-rose-500">
-              <AlertTriangle className="w-6 h-6 shrink-0" />
-              <h3 className="text-lg font-bold">Delete Account Permanently?</h3>
-            </div>
-            
-            <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">
-              This action is <strong className="text-rose-500">irreversible</strong>. All your notes, workspaces, subjects, tasks, and study records will be permanently deleted from our database.
-            </p>
+      {/* Delete Account Confirmation Modal */}
+      <AnimatePresence>
+        {isDeleteModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                if (!isDeleting) setIsDeleteModalOpen(false);
+              }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
 
-            {deleteError && (
-              <div className="p-3 text-xs text-rose-500 bg-rose-500/10 rounded-xl border border-rose-500/20 font-medium">
-                ⚠️ {deleteError}
+            {/* Modal Box */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-md overflow-hidden rounded-2xl border border-rose-500/20 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xl p-6 shadow-2xl space-y-4"
+            >
+              <div className="flex items-center space-x-3 text-rose-500">
+                <Trash2 className="w-6 h-6 shrink-0 animate-pulse" />
+                <h3 className="text-lg font-bold text-neutral-800 dark:text-neutral-100">
+                  Delete Account Permanently?
+                </h3>
               </div>
-            )}
 
-            <form onSubmit={handleDeleteAccount} className="space-y-4">
-              {/* Email confirmation input */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">
-                  Confirm email (<strong>{user?.email}</strong>)
-                </label>
+              <div className="space-y-2 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
+                <p className="font-semibold text-rose-600 dark:text-rose-400 bg-rose-500/5 p-3 rounded-xl border border-rose-500/10">
+                  ⚠️ Warning: This action is absolute and irreversible. All your notes, workspaces, checksheets, timers, and telemetry metrics will be deleted from our servers forever.
+                </p>
+                <p>
+                  To confirm, please type your email address <strong className="text-neutral-750 dark:text-neutral-200 font-bold selection:bg-indigo-500/30">{user?.email}</strong> below:
+                </p>
+              </div>
+
+              <form onSubmit={handleDeleteAccount} className="space-y-4">
                 <input
-                  type="email"
+                  type="text"
                   required
-                  placeholder="Enter your email"
-                  value={confirmEmail}
-                  onChange={(e) => setConfirmEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm rounded-xl glass-input text-neutral-800 dark:text-neutral-200 border border-white/10"
+                  placeholder={user?.email || "Verify your email"}
+                  value={confirmEmailInput}
+                  onChange={(e) => setConfirmEmailInput(e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-sm rounded-xl glass-input text-neutral-800 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-800 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 outline-none"
+                  disabled={isDeleting}
                 />
-              </div>
 
-              {/* Password confirmation input */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">
-                  Enter Password
-                </label>
-                <input
-                  type="password"
-                  required
-                  placeholder="Enter your password"
-                  value={deletePassword}
-                  onChange={(e) => setDeletePassword(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm rounded-xl glass-input text-neutral-800 dark:text-neutral-200 border border-white/10"
-                />
-              </div>
-
-              <div className="flex space-x-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsDeleteModalOpen(false);
-                    setConfirmEmail("");
-                    setDeletePassword("");
-                    setDeleteError("");
-                  }}
-                  className="flex-1 py-2.5 text-xs font-semibold rounded-xl bg-neutral-200 dark:bg-white/10 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-300 dark:hover:bg-white/20 transition-all cursor-pointer text-center"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={deleteLoading || confirmEmail.trim().toLowerCase() !== user?.email.toLowerCase() || !deletePassword}
-                  className="flex-1 py-2.5 text-xs font-semibold rounded-xl bg-rose-600 hover:bg-rose-500 disabled:bg-rose-600/40 text-white cursor-pointer transition-all shadow-lg hover:shadow-rose-500/20 flex items-center justify-center space-x-2"
-                >
-                  {deleteLoading ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>Deleting...</span>
-                    </>
-                  ) : (
-                    <span>Confirm Delete</span>
-                  )}
-                </button>
-              </div>
-            </form>
+                <div className="flex space-x-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsDeleteModalOpen(false)}
+                    className="flex-1 px-4 py-2.5 text-xs font-semibold rounded-xl text-neutral-500 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                    disabled={isDeleting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={confirmEmailInput !== user?.email || isDeleting}
+                    className="flex-1 px-4 py-2.5 text-xs font-bold rounded-xl text-white bg-rose-600 hover:bg-rose-500 shadow-lg shadow-rose-600/15 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5 cursor-pointer"
+                  >
+                    {isDeleting ? (
+                      <>
+                        <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />
+                        <span>Deleting...</span>
+                      </>
+                    ) : (
+                      <span>Permanently Delete</span>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 }

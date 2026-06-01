@@ -16,6 +16,7 @@ interface AuthContextType {
   signup: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   updateProfile: (name: string, focusGoal: number) => void;
+  deleteAccount: () => Promise<{ success: boolean; error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -54,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (loading) return;
 
-    const publicPaths = ["/login", "/signup", "/", "/forgot-password"];
+    const publicPaths = ["/login", "/signup", "/"];
     const isPublic = publicPaths.includes(pathname);
 
     if (!user && !isPublic) {
@@ -150,8 +151,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const deleteAccount = async () => {
+    try {
+      const res = await fetch("/api/auth/delete", {
+        method: "POST",
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        return { success: false, error: data.error || "Failed to delete account." };
+      }
+
+      localStorage.removeItem(STORAGE_USER_KEY);
+      setUser(null);
+      router.push("/login");
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: "An unexpected connection error occurred." };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout, updateProfile, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   );

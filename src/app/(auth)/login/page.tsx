@@ -1,18 +1,13 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Sparkles, Loader2, Mail, Lock } from "lucide-react";
 import BorderGlow from "@/components/react-bits/BorderGlow";
 
-function LoginForm() {
+export default function LoginPage() {
   const { login } = useAuth();
-  const searchParams = useSearchParams();
-  const resetSuccess = searchParams?.get("reset") === "success";
-  const deleteSuccess = searchParams?.get("deleted") === "success";
-  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -58,18 +53,6 @@ function LoginForm() {
               </p>
             </div>
 
-            {deleteSuccess && (
-              <div className="p-3 text-xs text-rose-500 bg-rose-500/10 rounded-xl border border-rose-500/20 text-center font-medium animate-pulse">
-                Your account and data have been permanently deleted.
-              </div>
-            )}
-
-            {resetSuccess && (
-              <div className="p-3 text-xs text-emerald-500 bg-emerald-500/10 rounded-xl border border-emerald-500/20 text-center font-medium">
-                Password reset successfully! Please sign in with your new password.
-              </div>
-            )}
-
             {error && (
               <div className="p-3 text-xs text-rose-500 bg-rose-500/10 rounded-xl border border-rose-500/20 text-center font-medium">
                 {error}
@@ -97,17 +80,9 @@ function LoginForm() {
 
               {/* Password */}
               <div className="space-y-1.5">
-                <div className="flex justify-between items-center">
-                  <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400">
-                    Password
-                  </label>
-                  <Link
-                    href="/forgot-password"
-                    className="text-xs font-semibold text-indigo-500 hover:underline"
-                  >
-                    Forgot Password?
-                  </Link>
-                </div>
+                <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400">
+                  Password
+                </label>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-neutral-400" />
                   <input
@@ -153,17 +128,5 @@ function LoginForm() {
         </BorderGlow>
       </div>
     </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={
-      <div className="flex flex-col items-center justify-center min-h-screen px-4">
-        <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
-      </div>
-    }>
-      <LoginForm />
-    </Suspense>
   );
 }
