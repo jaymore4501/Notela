@@ -46,39 +46,44 @@ export async function POST(request: Request) {
     const isDevMode = process.env.EMAIL_DEV_MODE === "true";
     const hasSmtpConfig = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
 
+    let emailSent = false;
+    let fallbackToDemo = false;
+
     if (hasSmtpConfig) {
       try {
         // Send a real OTP email
         await sendResetEmail(trimmedEmail, verificationCode);
+        emailSent = true;
         console.log(`[PASS_RESET] Real email sent successfully to ${trimmedEmail}`);
       } catch (emailErr: any) {
         console.error("Failed to send real reset email via SMTP:", emailErr);
         
         // In dev mode, we can log and fallback to on-screen helper. In production, we fail securely.
-        if (!isDevMode) {
+        if (isDevMode) {
+          fallbackToDemo = true;
+        } else {
           return NextResponse.json(
             { success: false, error: "Failed to dispatch password recovery email. Please contact support." },
             { status: 500 }
           );
         }
       }
-    } else if (!isDevMode) {
-      // No SMTP config and NOT dev mode -> secure error
-      console.warn("[PASS_RESET] Attempted reset request but SMTP variables are missing and Dev Mode is off.");
-      return NextResponse.json(
-        { success: false, error: "Email recovery service is currently unavailable. Please try again later." },
-        { status: 503 }
-      );
+    } else {
+      // SMTP is not configured: Fall back to Demo Mode so the app continues to function
+      fallbackToDemo = true;
+      console.warn("[PASS_RESET] SMTP credentials are not configured. Falling back to Demo Mode.");
     }
 
     // Console log fallback for local developers
-    console.log(`[PASS_RESET_MOCK] Verification code for ${trimmedEmail} is: ${verificationCode}`);
+    console.log(`[PASS_RESET] Verification code for ${trimmedEmail} is: ${verificationCode}`);
 
-    // Return the code in the response ONLY if dev mode is enabled
+    // Return the code in the response ONLY if fallbackToDemo is active (dev mode or missing SMTP config)
     return NextResponse.json({
       success: true,
-      message: "Verification code generated successfully.",
-      devCode: isDevMode ? verificationCode : undefined,
+      message: emailSent 
+        ? "Verification code sent to your email." 
+        : "Email service unconfigured. Fallback code generated (Demo Mode).",
+      devCode: fallbackToDemo ? verificationCode : undefined,
     });
   } catch (err: any) {
     console.error("Forgot password error:", err);
