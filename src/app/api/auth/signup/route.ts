@@ -6,17 +6,34 @@ import crypto from "crypto";
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password } = await request.json();
+    const body = await request.json();
+    const { name, email, password } = body || {};
     
-    if (!name || !email || !password) {
+    if (typeof name !== "string" || typeof email !== "string" || typeof password !== "string") {
       return NextResponse.json(
-        { success: false, error: "All fields are required." },
+        { success: false, error: "Invalid request payload." },
         { status: 400 }
       );
     }
 
     const trimmedName = name.trim();
     const trimmedEmail = email.trim().toLowerCase();
+
+    if (!trimmedName || !trimmedEmail || !password) {
+      return NextResponse.json(
+        { success: false, error: "All fields are required." },
+        { status: 400 }
+      );
+    }
+
+    // Strict email format verification
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid email format." },
+        { status: 400 }
+      );
+    }
 
     if (password.length < 6) {
       return NextResponse.json(

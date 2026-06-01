@@ -6,16 +6,26 @@ import crypto from "crypto";
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
+    const body = await request.json();
+    const { email, password } = body || {};
 
-    if (!email || !password) {
+    if (typeof email !== "string" || typeof password !== "string") {
       return NextResponse.json(
-        { success: false, error: "Please enter both email and password." },
+        { success: false, error: "Invalid request payload." },
         { status: 400 }
       );
     }
 
     const trimmedEmail = email.trim().toLowerCase();
+
+    // Strict email format verification
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid email format." },
+        { status: 400 }
+      );
+    }
 
     const client = await clientPromise;
     const db = client.db("notela");
@@ -45,8 +55,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Auto-migrate legacy plaintext password to PBKDF2 hash on successful login
-    if (!foundUser.password.includes(":")) {
+    // Auto-migrate legacy plaintext password or legacy salt:hash to upgraded PBKDF2 hash on successful login
+    if (!foundUser.password.startsWith("pbkdf2:")) {
       const hashedPassword = hashPassword(password);
       await usersCollection.updateOne(
         { _id: foundUser._id },

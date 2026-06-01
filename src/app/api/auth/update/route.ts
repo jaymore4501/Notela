@@ -35,8 +35,15 @@ export async function POST(request: Request) {
     if (body.oldPassword !== undefined && body.newPassword !== undefined) {
       const { oldPassword, newPassword } = body;
       
+      if (typeof oldPassword !== "string" || typeof newPassword !== "string") {
+        return NextResponse.json(
+          { success: false, error: "Invalid password fields." },
+          { status: 400 }
+        );
+      }
+      
       // Verify old password (handles legacy plaintext and hashed)
-      const isMatch = foundUser.password.includes(":")
+      const isMatch = foundUser.password.includes(":") || foundUser.password.startsWith("pbkdf2:")
         ? verifyPassword(oldPassword, foundUser.password)
         : foundUser.password === oldPassword;
 
@@ -68,6 +75,13 @@ export async function POST(request: Request) {
     // Action 2: Profile Settings Update (Name & Focus Goal)
     if (body.name !== undefined && body.focusGoal !== undefined) {
       const { name, focusGoal } = body;
+
+      if (typeof name !== "string" || isNaN(Number(focusGoal))) {
+        return NextResponse.json(
+          { success: false, error: "Invalid name or focus goal parameters." },
+          { status: 400 }
+        );
+      }
 
       if (!name.trim()) {
         return NextResponse.json(
