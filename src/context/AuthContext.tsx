@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (loading) return;
 
-    const publicPaths = ["/login", "/signup", "/"];
+    const publicPaths = ["/login", "/signup", "/", "/forgot-password"];
     const isPublic = publicPaths.includes(pathname);
 
     if (!user && !isPublic) {
