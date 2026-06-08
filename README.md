@@ -6,7 +6,6 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-blue)](https://react.dev/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg)](https://www.mongodb.com/)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#-contributing-guidelines)
 
 **Notela** is a modern, calm, and intelligent glassmorphic academic operating system designed for students. It centralizes note-taking, task management, subject organization, lifestyle habit tracking, focus sessions, and productivity analytics into a single, distraction-free productivity environment.
 
